@@ -25,10 +25,16 @@ def print_text(tickers, more):
         	return '{} ({}) has been delisted'.format(t['name'], t['ticker'])
 
 
+        main_info = '{} ({}): {} {}{}'.format(t['name'], t['ticker'], t['price'], t['change_direction'], t['change_amount'] )
+
         if more:
-            return '{} ({}): {} {}{}'.format(t['name'], t['ticker'], t['price'], t['change_direction'], t['change_amount'] )
+            open_str = 'Open: {}'.format(t['open'])
+            close_str = 'Previous Close: {}'.format(t['previous_close'])
+            volume_str = 'Volume: {}'.format(t['volume'])
+            ytd_str = 'YTD Return: {}'.format(t['ytd_return'])
+            return '\n'.join([main_info, open_str, close_str, volume_str, ytd_str])
         else:
-            return '{} ({}): {} {}{}'.format(t['name'], t['ticker'], t['price'], t['change_direction'], t['change_amount'] )
+            return main_info
         
 
     if not tickers:
