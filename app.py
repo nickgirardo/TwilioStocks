@@ -21,6 +21,10 @@ def print_text(tickers, more):
         if t['not_found']:
         	return '{} Not found'.format(t['ticker'])
 
+        if t['delisted']:
+        	return '{} ({}) has been delisted'.format(t['name'], t['ticker'])
+
+
         if more:
             return '{} ({}): {} {}{}'.format(t['name'], t['ticker'], t['price'], t['change_direction'], t['change_amount'] )
         else:
@@ -39,7 +43,6 @@ def print_text(tickers, more):
 def get_text():
 
     message = request.form['Body']
-    print 'message received'
 
     (tickers, more) = parse.parse_text(message)
 
