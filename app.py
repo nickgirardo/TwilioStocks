@@ -1,13 +1,20 @@
-import requests
+from flask import Flask
+from flask import request
+
+#Twilio includes
+from twilio.util import TwilioCapability
+from twilio.rest import TwilioRestClient
+from twilio.twiml import Response
+
 from lxml import html
-import re
 from functools import partial
+import re
+import requests as r
 
+import config
 
-"""a
-TODO return info instead of printing
-TODO get more info
-"""
+application = Flask(__name__)
+
 def get_stock_info(ticker, more_info=False):
 
     #direction of stock change
@@ -19,7 +26,7 @@ def get_stock_info(ticker, more_info=False):
 
     #scraping stock information from bloombergs website
     query_string = 'http://www.bloomberg.com/quote/' + ticker + ':US'
-    page = requests.get(query_string)
+    page = r.get(query_string)
     tree = html.fromstring(page.content)
     #If this div doesn't extist, a company with the given stock ticker doesn't exist
     price_container = tree.find_class('price-container')
@@ -100,8 +107,12 @@ def print_text(tickers, more):
     return join_str.join(map(print_ticker,tickers))
 
 
+@application.route('/', methods=['POST'])
+def get_text():
 
-def get_text(message):
+    message = request.form['Body']
+    print 'message received'
+
     (tickers, more) = parse_text(message)
 
     stock_info = []
@@ -111,4 +122,11 @@ def get_text(message):
     for t in tickers:
         stock_info = map(partial(get_stock_info,more_info=more),tickers)
 
-    print print_text(stock_info, more)
+    resp = Response()
+    resp.message(print_text(stock_info, more))
+    
+    return str(resp)
+
+
+if __name__ == '__main__':
+	application.run(host='0.0.0.0')
