@@ -1,6 +1,7 @@
 import requests
 from lxml import html
 import re
+from functools import partial
 
 
 """a
@@ -40,17 +41,14 @@ def get_stock_info(ticker, more_info=False):
     #change itself doesn't have a '+' or '-' in the actual string
     for c in price_container.classes:
         if c == 'up':
-            change = 'up'
+            change = '+'
         if c == 'down':
-            change = 'down'
+            change = '-'
 
     change_container = tree.find_class('change-container')[0]
+    stock_info['change_direction'] = change
     stock_info['change_amount'] = float(change_container[0].text_content())
     stock_info['change_percent'] = float(change_container[1].text_content().replace('%',''))
-    #Once again, this is necessary because the '-' character is just added with css
-    if c == 'down':
-    	stock_info['change_amount'] *= -1
-    	stock_info['change_percent'] *= -1
 
     #If requested, add extra info here
     if more_info:
@@ -82,11 +80,35 @@ def parse_text(message):
     return (tickers, more)
 
 
+def print_text(tickers, more):
+    
+    def print_ticker(t):
+        if t['not_found']:
+        	return '{} Not found'.format(t['ticker'])
+
+        if more:
+            return '{} ({}): {} {}{}'.format(t['name'], t['ticker'], t['price'], t['change_direction'], t['change_amount'] )
+        else:
+            return '{} ({}): {} {}{}'.format(t['name'], t['ticker'], t['price'], t['change_direction'], t['change_amount'] )
+        
+
+    if not tickers:
+    	return 'No companies recieved'
+    
+    join_str = '\n\n' if more else '\n'
+
+    return join_str.join(map(print_ticker,tickers))
+
+
+
 def get_text(message):
     (tickers, more) = parse_text(message)
+
+    stock_info = []
 
     if not tickers:
     	print 'No companies recieved'
     for t in tickers:
-        print get_stock_info(t, more)
+        stock_info = map(partial(get_stock_info,more_info=more),tickers)
 
+    print print_text(stock_info, more)
