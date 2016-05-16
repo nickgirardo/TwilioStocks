@@ -22,12 +22,22 @@ def get_stock_info(ticker, more_info=False):
     	return stock_info
     else:
     	price_container = price_container[0]
-    price_element = tree.find_class('price')[0]
-    stock_info['price'] = float(price_element.text_content())
 
     #Find the name of the company
     name_element = tree.find_class('name')[0]
     stock_info['name'] = name_element.text_content().strip()
+
+    #Check if the ticker has been delisted (e.g. APPL)
+    market_status = tree.find_class('market-status')[0].text_content().strip()
+    if market_status == "Ticker Delisted":
+    	stock_info['delisted'] = True
+    	return stock_info
+    else:
+    	stock_info['delisted'] = False
+
+    price_element = tree.find_class('price')[0]
+    stock_info['price'] = float(price_element.text_content())
+
 
     #the price container will either be given a class up or down for styling
     #this is how we can tell the direction the stock has moved as the
