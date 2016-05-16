@@ -31,6 +31,10 @@ def get_stock_info(ticker, more_info=False):
     price_element = tree.find_class('price')[0]
     stock_info['price'] = float(price_element.text_content())
 
+    #Find the name of the company
+    name_element = tree.find_class('name')[0]
+    stock_info['name'] = name_element.text_content().strip()
+
     #the price container will either be given a class up or down for styling
     #this is how we can tell the direction the stock has moved as the
     #change itself doesn't have a '+' or '-' in the actual string
