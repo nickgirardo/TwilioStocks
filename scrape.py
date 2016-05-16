@@ -55,6 +55,17 @@ def get_stock_info(ticker, more_info=False):
 
     #If requested, add extra info here
     if more_info:
-    	pass
+    	cells = tree.find_class('cell')
+        for c in cells:
+            cell_label = c.find_class('cell__label')[0].text_content().strip()
+            cell_value = c.find_class('cell__value')[0].text_content().strip()
+            if cell_label == 'Open':
+            	stock_info['open'] = cell_value
+            elif cell_label == 'Previous Close':
+                stock_info['previous_close'] = cell_value
+            elif cell_label == 'Volume':
+                stock_info['volume'] = cell_value
+            elif cell_label == 'YTD Return':
+                stock_info['ytd_return'] = cell_value
 
     return stock_info
